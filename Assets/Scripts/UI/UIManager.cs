@@ -98,6 +98,40 @@ public class UIManager : MonoBehaviour
         }
     }
     
+    // Add these fields to the UIManager class
+    [Header("Win Counter UI")]
+    [SerializeField] private GameObject winCounterPanel;
+    [SerializeField] private TextMeshProUGUI playerXWinsText;
+    [SerializeField] private TextMeshProUGUI playerOWinsText;
+    [SerializeField] private TextMeshProUGUI winsRequiredText;
+    
+    // Add this method to the UIManager class
+    public void UpdateWinCounters(int playerXWins, int playerOWins, int winsRequired)
+    {
+        if (winCounterPanel != null)
+        {
+            winCounterPanel.SetActive(true);
+        }
+        
+        if (playerXWinsText != null)
+        {
+            playerXWinsText.text = $"Player X: {playerXWins}/{winsRequired}";
+            playerXWinsText.color = gameSettings.playerXColor;
+        }
+        
+        if (playerOWinsText != null)
+        {
+            playerOWinsText.text = $"Player O: {playerOWins}/{winsRequired}";
+            playerOWinsText.color = gameSettings.playerOColor;
+        }
+        
+        if (winsRequiredText != null)
+        {
+            winsRequiredText.text = $"First to {winsRequired} wins!";
+        }
+    }
+    
+    // Modify the ShowGameOverUI method
     public void ShowGameOverUI(PlayerType winner)
     {
         if (gameOverPanel != null)
@@ -106,7 +140,10 @@ public class UIManager : MonoBehaviour
             
             if (gameOverText != null)
             {
-                gameOverText.text = $"Player {winner} Wins!";
+                WinConditionChecker winChecker = GameManager.Instance.GetWinConditionChecker();
+                int winCount = winner == PlayerType.X ? winChecker.PlayerXWins : winChecker.PlayerOWins;
+                
+                gameOverText.text = $"Player {winner} Wins!\nScore: {winCount}/{winChecker.WinsRequired}";
                 gameOverText.color = winner == PlayerType.X ? 
                     gameSettings.playerXColor : gameSettings.playerOColor;
             }

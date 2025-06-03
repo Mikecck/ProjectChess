@@ -21,6 +21,14 @@ public class GameManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private GameSettings gameSettings;
     
+    [Header("AI")]
+    [SerializeField] private AIPlayer aiPlayer;
+    [SerializeField] private bool enableAI = true;
+    [SerializeField] private PlayerType humanPlayerType = PlayerType.X;
+
+    public PlayerType CurrentPlayer => turnManager.CurrentPlayer;
+
+
     private GameState _currentState = GameState.Menu;
     public GameState CurrentState => _currentState;
     
@@ -52,6 +60,12 @@ public class GameManager : MonoBehaviour
         {
             uiManager.UpdatePlayerTurn(turnManager.CurrentPlayer);
             uiManager.UpdateMoveCounter(turnManager.MoveCount);
+        }
+        
+        // Configure AI player
+        if (aiPlayer != null && enableAI)
+        {
+            aiPlayer.enabled = true;
         }
     }
     
@@ -153,5 +167,8 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public PlayerType CurrentPlayer => turnManager.CurrentPlayer;
+    public WinConditionChecker GetWinConditionChecker()
+    {
+        return winConditionChecker;
+    }
 }

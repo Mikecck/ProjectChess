@@ -9,13 +9,32 @@ public class WinConditionChecker : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private bool enableDiagonal3D = true;
     [SerializeField] private bool enableVerticalWins = true;
+    [SerializeField] private int winsRequiredToWin = 2; // Number of wins required to win the game
+    
+    public List<List<GridPosition>> WinLines => winLines;
     
     // Win line definitions
     private List<List<GridPosition>> winLines = new List<List<GridPosition>>();
     
+    // Win counters for each player
+    private int playerXWins = 0;
+    private int playerOWins = 0;
+    
+    // Properties to access win counts
+    public int PlayerXWins => playerXWins;
+    public int PlayerOWins => playerOWins;
+    public int WinsRequired => winsRequiredToWin;
+    
     public void Initialize()
     {
         GenerateWinLines();
+        ResetWinCounts();
+    }
+    
+    public void ResetWinCounts()
+    {
+        playerXWins = 0;
+        playerOWins = 0;
     }
     
     private void GenerateWinLines()
@@ -170,12 +189,42 @@ public class WinConditionChecker : MonoBehaviour
             {
                 if (CheckLine(line, playerType))
                 {
-                    return true;
+                    // Increment win counter for this player
+                    IncrementWinCount(playerType);
+                    
+                    // Check if player has reached the required number of wins
+                    return HasPlayerWonGame(playerType);
                 }
             }
         }
         
         return false;
+    }
+    
+    private void IncrementWinCount(PlayerType playerType)
+    {
+        if (playerType == PlayerType.X)
+        {
+            playerXWins++;
+        }
+        else
+        {
+            playerOWins++;
+        }
+        
+        Debug.Log($"Player {playerType} achieved a win! Current score: X={playerXWins}, O={playerOWins}");
+    }
+    
+    public bool HasPlayerWonGame(PlayerType playerType)
+    {
+        if (playerType == PlayerType.X)
+        {
+            return playerXWins >= winsRequiredToWin;
+        }
+        else
+        {
+            return playerOWins >= winsRequiredToWin;
+        }
     }
     
     private bool ContainsPosition(List<GridPosition> line, GridPosition position)
@@ -210,15 +259,23 @@ public class WinConditionChecker : MonoBehaviour
         {
             if (CheckLine(line, PlayerType.X))
             {
-                return true;
+                IncrementWinCount(PlayerType.X);
+                return HasPlayerWonGame(PlayerType.X);
             }
             
             if (CheckLine(line, PlayerType.O))
             {
-                return true;
+                IncrementWinCount(PlayerType.O);
+                return HasPlayerWonGame(PlayerType.O);
             }
         }
         
         return false;
+    }
+    
+    // Get the current leader (player with most wins)
+    public PlayerType GetLeadingPlayer()
+    {
+        return playerXWins >= playerOWins ? PlayerType.X : PlayerType.O;
     }
 }

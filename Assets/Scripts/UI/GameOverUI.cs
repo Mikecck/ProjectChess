@@ -32,45 +32,45 @@ public class GameOverUI : MonoBehaviour
             mainMenuButton.onClick.AddListener(OnMainMenuClicked);
         }
     }
-    
-    public void ShowGameOver(PlayerType winner, int totalMoves)
+
+    // Modify the ShowGameOver method
+    public void ShowGameOver(PlayerType winner)
     {
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
         }
-        
+
         if (winnerText != null)
         {
-            winnerText.text = $"Player {winner} Wins!";
-            winnerText.color = winner == PlayerType.X ? 
-                gameSettings.playerXColor : gameSettings.playerOColor;
+            if (GameManager.Instance != null)
+            {
+                WinConditionChecker winChecker = GameManager.Instance.GetComponent<WinConditionChecker>();
+                if (winChecker != null && gameSettings != null)
+                {
+                    int winCount = winner == PlayerType.X ? winChecker.PlayerXWins : winChecker.PlayerOWins;
+                    winnerText.text = $"Player {winner} Wins!\nScore: {winCount}/{winChecker.WinsRequired}";
+                    winnerText.color = winner == PlayerType.X ? gameSettings.playerXColor : gameSettings.playerOColor;
+                }
+                else
+                {
+                    winnerText.text = $"Player {winner} Wins!";
+                }
+            }
         }
-        
-        if (statsText != null)
-        {
-            statsText.text = $"Total Moves: {totalMoves}";
-        }
-        
-        // PlayWinAnimation();
     }
-    
-    public void ShowDraw(int totalMoves)
+
+    public void ShowDraw()
     {
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
         }
-        
+
         if (winnerText != null)
         {
             winnerText.text = "It's a Draw!";
             winnerText.color = Color.white;
-        }
-        
-        if (statsText != null)
-        {
-            statsText.text = $"Total Moves: {totalMoves}";
         }
     }
     

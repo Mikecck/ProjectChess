@@ -10,6 +10,7 @@ public class BoardManager : MonoBehaviour
 
     private GamePiece[,,] grid = new GamePiece[3, 3, 3];
     private GameObject[,,] gridCells = new GameObject[3, 3, 3];
+    private GamePiece[,,] simulationGrid = new GamePiece[3, 3, 3];
 
     public void Initialize()
     {
@@ -199,5 +200,85 @@ public class BoardManager : MonoBehaviour
         }
         
         return true;
+    }
+
+
+    //Extra functions for simulation
+    public void StartSimulation()
+    {
+        // Copy the current grid to the simulation grid
+        for (int y = 0; y < 3; y++)
+        {
+            for (int z = 0; z < 3; z++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    simulationGrid[x, y, z] = grid[x, y, z];
+                }
+            }
+        }
+    }
+
+    public void EndSimulation()
+    {
+        // Restore the original grid
+        for (int y = 0; y < 3; y++)
+        {
+            for (int z = 0; z < 3; z++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    grid[x, y, z] = simulationGrid[x, y, z];
+                }
+            }
+        }
+    }
+
+    public bool SimulatePlacePiece(GridPosition position, PlayerType playerType)
+    {
+        if (!position.IsValid() || !IsPositionEmpty(position) || !HasSupportBelow(position))
+            return false;
+
+        // Create a temporary piece for simulation
+        GameObject tempObject = new GameObject("TempPiece");
+        GamePiece tempPiece = tempObject.AddComponent<GamePiece>();
+        tempPiece.Initialize(playerType);
+        tempPiece.Position = position;
+
+        grid[position.x, position.y, position.z] = tempPiece;
+
+        return true;
+    }
+
+    public void UndoSimulatedMove(GridPosition position)
+    {
+        if (!position.IsValid())
+            return;
+
+        GamePiece piece = grid[position.x, position.y, position.z];
+        if (piece != null)
+        {
+            Destroy(piece.gameObject);
+            grid[position.x, position.y, position.z] = null;
+        }
+    }
+
+    public GamePiece SimulateRemovePiece(GridPosition position)
+    {
+        if (!position.IsValid() || IsPositionEmpty(position))
+            return null;
+
+        GamePiece piece = grid[position.x, position.y, position.z];
+        grid[position.x, position.y, position.z] = null;
+
+        return piece;
+    }
+
+    public void UndoSimulatedRemoval(GridPosition position, GamePiece piece)
+    {
+        if (!position.IsValid() || !IsPositionEmpty(position))
+            return;
+
+        grid[position.x, position.y, position.z] = piece;
     }
 }
